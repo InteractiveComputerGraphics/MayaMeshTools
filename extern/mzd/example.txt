@@ -1,0 +1,100 @@
+// example using the readMZD() function.
+
+#include "readMZD.h"
+
+int main(int argc, char *argv[])
+{
+    // output version.
+    printf("\nreadMZD (version %g)\n", READMZD_VERSION);
+
+    // check argument count.
+    if (argc != 2)
+    {
+        printf("\nerror: illegal amount of argument. Please specify a .mzd file as input.\n\n");
+        return -1;
+    }
+
+    // declare and init the pointers.
+    int              numVertices        = 0;    // amount of vertices.
+    int              numPolygons        = 0;    // amount of polygons.
+    int              numNodes           = 0;    // amount of polygon nodes.
+    float           *vertPositions      = NULL; // array of vertex positions.               Array size is 3 * numVertices.
+    unsigned char   *polyVIndicesNum    = NULL; // array of polygon vertex indices count.   Array size is numPolygons.
+    int             *polyVIndices       = NULL; // array of polygon vertex indices.         Array size is numNodes.
+    float           *vertNormals        = NULL; // array of vertex normal vectors.          Array size is 3 * numVertices.
+    float           *vertMotions        = NULL; // array of vertex motion vectors.          Array size is 3 * numVertices.
+    float           *vertColors         = NULL; // array of vertex colors.                  array size is 4 * numVertices.
+    float           *vertUVWs           = NULL; // array of vertex UVW coordinates.         Array size is 3 * numVertices.
+    float           *nodeNormals        = NULL; // array of polygon node normal vectors.    Array size is 3 * numNodes.
+    float           *nodeColors         = NULL; // array of polygon node colors.            Array size is 4 * numNodes.
+    float           *nodeUVWs           = NULL; // array of polygon node UVW coordinates.   Array size is 3 * numNodes.
+
+    // read the .mzd file.
+    printf("\nreading \"%s\".", argv[1]);
+    int ret = readMZD(argv[1], numVertices, numPolygons, numNodes, &vertPositions, &polyVIndicesNum, &polyVIndices, &vertNormals, &vertMotions, &vertColors, &vertUVWs, &nodeNormals, &nodeColors, &nodeUVWs);
+    switch (ret)
+    {
+        case 0:     printf("\n\nfile successfully read.");              break;
+        case -1:    printf("\n\nerror: unable to open file.\n");        return ret;
+        case -2:    printf("\n\nerror: read error.\n");                 return ret;
+        case -3:    printf("\n\nerror: failed to allocate memory.\n");  return ret;
+        case -4:    printf("\n\nerror: wrong file format.\n");          return ret;
+        case -5:    printf("\n\nerror: illegal parameter value.\n");    return ret;
+        default:    printf("\n\nerror: unkown error.\n");               return ret;
+    }
+
+    // count the amount of triangles, quads and 5+ polygons.
+    int numTriangles    = 0;
+    int numQuads        = 0;
+    int numFivePlus     = 0;
+    {
+        unsigned char *pn = polyVIndicesNum;
+        for (int i=0;i<numPolygons;i++,pn++)
+        {
+            if      (*pn == 3)  numTriangles++;
+            else if (*pn == 4)  numQuads++;
+            else if (*pn >= 5)  numFivePlus++;
+        }
+    }
+
+    // output some information.
+    printf("\n\nthe mesh has:");
+    printf("\n    - %d vertices.",      numVertices);
+    printf("\n    - %d polygon(s).",    numPolygons);
+    printf("\n    - %d triangle(s).",   numTriangles);
+    printf("\n    - %d quad(s).",       numQuads);
+    printf("\n    - %d 5+ poly(s).)",   numFivePlus);
+    if (numTriangles + numQuads + numFivePlus != numPolygons)
+        printf("\n    - %d polygon(s) with less than three vertices!", numPolygons - numTriangles - numQuads - numFivePlus);
+    if (vertNormals)    printf("\n    - vertex normals.");
+    if (vertMotions)    printf("\n    - vertex motion vectors.");
+    if (vertColors)     printf("\n    - vertex colors.");
+    if (vertUVWs)       printf("\n    - vertex UVWs.");
+    if (nodeNormals)    printf("\n    - polygon node normal vectors.");
+    if (nodeColors)     printf("\n    - polygon node colors.");
+    if (nodeUVWs)       printf("\n    - polygon node UVWs.");
+
+    // clean up.
+    if (vertPositions)      {   free(vertPositions);    vertPositions   = NULL; }
+    if (polyVIndicesNum)    {   free(polyVIndicesNum);  polyVIndicesNum = NULL; }
+    if (polyVIndices)       {   free(polyVIndices);     polyVIndices    = NULL; }
+    if (vertNormals)        {   free(vertNormals);      vertNormals     = NULL; }
+    if (vertMotions)        {   free(vertMotions);      vertMotions     = NULL; }
+    if (vertColors)         {   free(vertColors);       vertColors      = NULL; }
+    if (vertUVWs)           {   free(vertUVWs);         vertUVWs        = NULL; }
+    if (nodeNormals)        {   free(nodeNormals);      nodeNormals     = NULL; }
+    if (nodeColors)         {   free(nodeColors);       nodeColors      = NULL; }
+    if (nodeUVWs)           {   free(nodeUVWs);         nodeUVWs        = NULL; }
+    numVertices     = 0;
+    numPolygons     = 0;
+    numNodes        = 0;
+    
+    // done.
+    printf("\n\n");
+    return 0;
+}
+
+
+
+
+

@@ -1,0 +1,28 @@
+global proc createMeshLoader() 
+{
+	// create mesh loader node
+	string $meshLoaderNode = `createNode MeshLoader -name "MeshLoader1"`;
+
+	string $meshName = `createNode mesh`;
+	connectAttr -f ($meshLoaderNode + ".outMesh[0]") ($meshName + ".inMesh");
+	connectAttr -f ($meshName + ".instObjGroups[0]") initialShadingGroup.dagSetMembers[0];
+
+	expression -s ("int $cTime = `currentTime -q`;\n" + $meshLoaderNode + ".frameIndex = $cTime;")  -o $meshLoaderNode -ae 1 -uc all;
+	
+	select -r $meshLoaderNode;
+}
+
+global proc MPT_RemoveEditorTemplate(string $typeName)
+{
+	string $layouts[]=`lsUI -cl`;
+	string $layout_elem;
+	for ($layout_elem in $layouts)
+	{
+		string $layoutName = "AttrEd" + $typeName + "FormLayout";
+		if ($layout_elem == $layoutName)
+		{
+			deleteUI -lay $layoutName;
+			break;
+		}
+	}
+}

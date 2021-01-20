@@ -1,0 +1,13 @@
+global proc AEMeshLoaderTemplate( string $nodeName )
+{
+	editorTemplate -beginLayout "Global" -collapse 0;
+	editorTemplate -addControl "active";
+	editorTemplate -addControl "meshFile";
+	editorTemplate -addControl "frameIndex";
+	editorTemplate -endLayout;
+
+	editorTemplate -beginScrollLayout;
+
+	editorTemplate -addExtraControls;
+	editorTemplate -endScrollLayout;
+}
